@@ -1,5 +1,10 @@
 # Personal Website
 
+![Python](https://img.shields.io/badge/python-3.8+-blue.svg)
+![Python 3.12](https://img.shields.io/badge/tested%20on-python%203.12-brightgreen.svg)
+![Version](https://img.shields.io/badge/version-0.2-orange.svg)
+![License](https://img.shields.io/badge/license-Personal%20Use-red.svg)
+
 A Python web application built with PyWebIO featuring user authentication, theme customization, and dashboard functionality.
 
 ## Version
@@ -17,7 +22,7 @@ A Python web application built with PyWebIO featuring user authentication, theme
 
 ## Requirements
 
-- Python 3.x
+- Python 3.8+ (tested on Python 3.12)
 - PyWebIO
 - TinyDB
 
@@ -25,6 +30,11 @@ A Python web application built with PyWebIO featuring user authentication, theme
 
 1. Clone or download the project
 2. Install required dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+   
+   Or manually install:
    ```bash
    pip install pywebio tinydb
    ```
