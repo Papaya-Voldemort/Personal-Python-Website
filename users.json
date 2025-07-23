@@ -1,0 +1,12 @@
+{
+    "_default": {
+        "1": {
+            "username": "Eli",
+            "password": "secret"
+        },
+        "2": {
+            "username": "Tate",
+            "password": "secrets"
+        }
+    }
+}
