@@ -2,11 +2,13 @@
     "_default": {
         "1": {
             "username": "Eli",
-            "password": "secret"
+            "password": "secret",
+            "theme": "dark"
         },
         "2": {
             "username": "Tate",
-            "password": "secrets"
+            "password": "secrets",
+            "theme": "deafult"
         }
     }
 }

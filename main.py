@@ -1,10 +1,12 @@
+import pywebio
 from pywebio.input import input, input_group, PASSWORD, actions
 from pywebio.output import put_text
-from pywebio import start_server
-from tinydb import TinyDB
+from pywebio import start_server, config
+from tinydb import TinyDB, Query
 from tinydb.storages import JSONStorage
 import json
-from helpers import sign_up, login
+from helpers import sign_up, login, view_dashboard
+
 
 class PrettyJSONStorage(JSONStorage):
     def __init__(self, path, **kwargs):
@@ -22,9 +24,18 @@ def app():
         actions(name='Sign_Up', buttons=[{'label': 'Sign Up', 'value': 'sign_up'}])
     ])
     if has_account['Login'] == 'login':
-        login(users)
+        username = login(users)
     elif has_account['Sign_Up'] == 'sign_up':
         sign_up(users)
+
+    pywebio.session.info = {'username': username}
+    pywebio.session.info['theme'] = users.search(Query().username == username)[0]['theme']
+
+
+    while view_dashboard(users, username) == "reset":
+        print("all systems operational")
+    else:
+        quit()
 
 if __name__ == '__main__':
     start_server(app, port=8080, cdn=True)
