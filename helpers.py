@@ -108,7 +108,7 @@ def view_dashboard(users, username):
         put_text(f"✅ Theme switched to: {theme.capitalize()}")
         put_text("Your theme preference has been saved!")
         time.sleep(3)
-        return "reset" # Return to dashboard and remove text for theme switch
+        return "reset" # TODO: Return to dashboard and remove text for theme switch
 
 
     else:
