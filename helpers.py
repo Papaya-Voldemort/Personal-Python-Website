@@ -1,11 +1,13 @@
+import pywebio.output
 from pywebio.input import input, input_group, PASSWORD, actions, select
-from pywebio.output import put_text, clear
+from pywebio.output import put_text, clear, put_info
 from pywebio import start_server, session, config
 from pywebio.session import run_js
 from tinydb import TinyDB, Query
 import time
 import datetime
 import time
+import random
 
 # Map of themes to Bootswatch URLs
 BOOTSWATCH_THEMES = {
@@ -16,6 +18,21 @@ BOOTSWATCH_THEMES = {
     "sketchy": "https://cdn.jsdelivr.net/npm/bootswatch@4.6.2/dist/sketchy/bootstrap.min.css",
     "sandstone": "https://cdn.jsdelivr.net/npm/bootswatch@4.6.2/dist/sandstone/bootstrap.min.css",
 }
+
+
+def aura_ranker():
+    put_text("Aura Ranker")
+    progress = 0.0
+    pywebio.output.put_progressbar("loading_aura_ranker", progress, "Loading Aura Ranker")
+    while progress < 1.0:
+        progress += 0.1
+        pywebio.output.set_progressbar("loading_aura_ranker", progress, "Loading Aura Ranker")
+        time.sleep(1)
+    put_text("Aura Ranker Loaded...")
+    time.sleep(3)
+
+    pywebio.output.popup("Aura Ranker", f"Your Aura is {random.randint(1, 100)}% nice!", "large", True)
+    clear()
 
 def apply_theme_live(theme):
     """Apply theme change immediately without page reload"""
@@ -59,8 +76,8 @@ def sign_up(users):
 
 def login(users):
     data = input_group("Login", [
-        input("Username", name='username'),
-        input("Password", type=PASSWORD, name='password')
+        input("Username (use guest for testing)", name='username'),
+        input("Password (use guest for testing)", type=PASSWORD, name='password')
     ])
     if users.search((Query().username == data['username']) & (Query().password == data['password'])):
         put_text(f"Welcome back, {data['username']}!")
@@ -84,8 +101,10 @@ def view_dashboard(users, username):
 
     dashboard_options = input_group("Dashboard", [
         actions(name='Start', buttons=[{'label': 'Time until SoM end!', 'value': 'start'}]),
-        actions(name='User_Settings', buttons=[{'label': 'User Settings', 'value': 'settings'}])
-
+        actions(name='User_Settings', buttons=[{'label': 'User Settings', 'value': 'settings'}]),
+        actions(name='Quotes', buttons=[{'label': 'Quotes', 'value': 'quotes'}]),
+        actions(name='About_me', buttons=[{'label': 'About me', 'value': 'about'}]),
+        actions(name="Aura_Ranker", buttons=[{'label': 'Aura Ranker', 'value': 'ranking'}]),
     ])
 
     if dashboard_options['Start'] == 'start':
@@ -108,7 +127,36 @@ def view_dashboard(users, username):
         put_text(f"✅ Theme switched to: {theme.capitalize()}")
         put_text("Your theme preference has been saved!")
         time.sleep(3)
-        return "reset" # TODO: Return to dashboard and remove text for theme switch
+        clear()
+        return "reset"
+
+    elif dashboard_options['Quotes'] == 'quotes':
+        print("No quotes yet!")
+        #TODO add random quotes
+
+
+
+    elif dashboard_options['About_me'] == 'about':
+        put_text("About me!")
+        progress = 0.0
+        pywebio.output.put_progressbar("loading", progress, None)
+        while progress < 1.0:
+            progress += 0.1
+            pywebio.output.set_progressbar("loading", progress, None)
+            time.sleep(1)
+        clear()
+        put_text("About me!")
+        put_info("""
+        I am a 15 year old boy who loves to code!\n
+        My favorite language is Python because of its easy to learn structure and speed of development\n
+        I recently discovered pywebio an amazing python web framework\n
+        It makes development fast and easy!""")
+
+    elif dashboard_options['Aura_Ranker'] == 'ranking':
+        aura_ranker()
+        return "reset"
+
+
 
 
     else:

@@ -8,6 +8,8 @@ import json
 from helpers import sign_up, login, view_dashboard
 
 
+
+
 class PrettyJSONStorage(JSONStorage):
     def __init__(self, path, **kwargs):
         super().__init__(path, **kwargs)
@@ -19,12 +21,17 @@ class PrettyJSONStorage(JSONStorage):
 users = TinyDB('users.json', storage=PrettyJSONStorage)
 
 def app():
+    pywebio.output.popup("Welcome!", "Welcome! Feel free to test things out! \n"
+                                                  "I am not sure about my hosting so it might break!", "large", True)
+
+
     has_account = input_group("Options", [
         actions(name='Login', buttons=[{'label': 'Login', 'value': 'login'}]),
         actions(name='Sign_Up', buttons=[{'label': 'Sign Up', 'value': 'sign_up'}])
     ])
     if has_account['Login'] == 'login':
         username = login(users)
+
     elif has_account['Sign_Up'] == 'sign_up':
         sign_up(users)
 
