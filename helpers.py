@@ -132,7 +132,7 @@ def view_dashboard(users, username):
 
     elif dashboard_options['Quotes'] == 'quotes':
         print("No quotes yet!")
-        #TODO add random quotes
+        #TODO add random quotes api
 
 
 
