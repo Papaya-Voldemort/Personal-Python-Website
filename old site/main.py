@@ -1,12 +1,11 @@
 import pywebio
 from pywebio.input import input, input_group, PASSWORD, actions
-from pywebio.output import put_text
+from pywebio.output import put_text, put_tabs, put_markdown
 from pywebio import start_server, config
 from tinydb import TinyDB, Query
 from tinydb.storages import JSONStorage
 import json
 from helpers import sign_up, login, view_dashboard
-
 
 
 

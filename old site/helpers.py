@@ -1,13 +1,17 @@
-import pywebio.output
-from pywebio.input import input, input_group, PASSWORD, actions, select
-from pywebio.output import put_text, clear, put_info
-from pywebio import start_server, session, config
-from pywebio.session import run_js
-from tinydb import TinyDB, Query
 import time
 import datetime
-import time
 import random
+import bcrypt
+
+from tinydb import TinyDB, Query
+
+from pywebio import start_server, session, config
+from pywebio.input import input, input_group, PASSWORD, actions, select
+from pywebio.output import (
+    put_text, clear, put_info, put_tabs, put_buttons,
+    put_markdown, put_progressbar, set_progressbar
+)
+from pywebio.session import run_js, run_async
 
 # Map of themes to Bootswatch URLs
 BOOTSWATCH_THEMES = {
@@ -71,7 +75,9 @@ def sign_up(users):
         put_text("Username already exists. Please choose a different username.")
         sign_up(users)
     else:
-        users.insert({'username': data['username'], 'password': data['password'], 'theme': 'default'})
+        password = data['password'].encode('utf-8')
+        hashed = bcrypt.hashpw(password, bcrypt.gensalt())
+        users.insert({'username': data['username'], 'password': hashed.decode('utf-8'), 'theme': 'default'})
         put_text(f"Account created successfully! You can now log in, {data['username']}.")
 
 def login(users):
@@ -79,86 +85,65 @@ def login(users):
         input("Username (use guest for testing)", name='username'),
         input("Password (use guest for testing)", type=PASSWORD, name='password')
     ])
-    if users.search((Query().username == data['username']) & (Query().password == data['password'])):
-        put_text(f"Welcome back, {data['username']}!")
-        return data['username']
-    else:
-        put_text("Invalid username or password. Please try again.")
-        return login(users)# Prompt the user to log in again
+    user = users.search(Query().username == data['username'])
+    if user:
+        stored_hash = user[0]['password'].encode('utf-8')
+        if bcrypt.checkpw(data['password'].encode('utf-8'), stored_hash):
+            put_text(f"Welcome back, {data['username']}!")
+            return data['username']
+    put_text("Invalid username or password. Please try again.")
+    return login(users)
+
+from pywebio.output import put_tabs, put_text, put_buttons, put_info, put_progressbar, set_progressbar, clear
+from pywebio.input import select
+import time, datetime
 
 def view_dashboard(users, username):
     def set_user_theme(users, username, theme):
         User = Query()
         users.update({'theme': theme}, User.username == username)
 
-    def countdown(seconds):
-        for i in range(seconds, 0, -1):
-            clear()
-            put_text(f"Summer of Making ends in {i} seconds")
-            time.sleep(1)
-        clear()
-        put_text("Time's up!")
-
-    dashboard_options = input_group("Dashboard", [
-        actions(name='Start', buttons=[{'label': 'Time until SoM end!', 'value': 'start'}]),
-        actions(name='User_Settings', buttons=[{'label': 'User Settings', 'value': 'settings'}]),
-        actions(name='Quotes', buttons=[{'label': 'Quotes', 'value': 'quotes'}]),
-        actions(name='About_me', buttons=[{'label': 'About me', 'value': 'about'}]),
-        actions(name="Aura_Ranker", buttons=[{'label': 'Aura Ranker', 'value': 'ranking'}]),
-    ])
-
-    if dashboard_options['Start'] == 'start':
+    def tab_som_timer():
         now = datetime.datetime.now()
-        august_31 = datetime.datetime(now.year, 8, 31, 0, 0, 0)
-        seconds_until_august_31 = int((august_31 - now).total_seconds())
-        countdown(seconds_until_august_31)
-    elif dashboard_options['User_Settings'] == 'settings':
+        august_31 = datetime.datetime(now.year, 8, 31)
+        seconds = int((august_31 - now).total_seconds())
+        put_text(f"⏳ Summer of Making ends in {seconds:,} seconds!")
+
+    def tab_user_settings():
         put_text("🎨 User Settings - Theme Selection")
-
         theme = select("Choose a theme:", list(BOOTSWATCH_THEMES.keys()))
-
-        # Apply the theme immediately with live switching
         apply_theme_live(theme)
-
-        # Save the theme preference to the database
         set_user_theme(users, username, theme)
-
-        # Provide feedback to the user
         put_text(f"✅ Theme switched to: {theme.capitalize()}")
         put_text("Your theme preference has been saved!")
-        time.sleep(3)
+
+    def tab_quotes():
+        put_text("📜 Quotes")
+        put_text("No quotes yet! (To be implemented)")
+
+    def tab_about_me():
+        put_text("👤 About Me Loading...")
+        put_progressbar("loading", 0)
+        for i in range(10):
+            time.sleep(0.1)
+            set_progressbar("loading", (i+1)/10)
         clear()
-        return "reset"
-
-    elif dashboard_options['Quotes'] == 'quotes':
-        print("No quotes yet!")
-        #TODO add random quotes api
-
-
-
-    elif dashboard_options['About_me'] == 'about':
-        put_text("About me!")
-        progress = 0.0
-        pywebio.output.put_progressbar("loading", progress, None)
-        while progress < 1.0:
-            progress += 0.1
-            pywebio.output.set_progressbar("loading", progress, None)
-            time.sleep(1)
-        clear()
-        put_text("About me!")
+        put_text("👤 About Me")
         put_info("""
-        I am a 15 year old boy who loves to code!\n
-        My favorite language is Python because of its easy to learn structure and speed of development\n
-        I recently discovered pywebio an amazing python web framework\n
-        It makes development fast and easy!""")
+        I am a 15-year-old who loves to code!  
+        My favorite language is Python because of its clear structure and fast development time.  
+        I recently discovered PyWebIO — an amazing Python web framework that makes development quick and fun!
+        """)
 
-    elif dashboard_options['Aura_Ranker'] == 'ranking':
-        aura_ranker()
-        return "reset"
+    def tab_aura_ranker():
+        aura_ranker()  # Assuming defined elsewhere
 
+    # 🧠 True lazy tabs — use lambdas so they don’t all run immediately!
+    put_tabs([
+        {'title': 'SoM Countdown', 'content': lambda: tab_som_timer()},
+        {'title': 'User Settings', 'content': lambda: tab_user_settings()},
+        {'title': 'Quotes', 'content': lambda: tab_quotes()},
+        {'title': 'About Me', 'content': lambda: tab_about_me()},
+        {'title': 'Aura Ranker', 'content': lambda: tab_aura_ranker()},
+    ])
 
-
-
-    else:
-        put_text("Invalid option. Please try again.")
-        view_dashboard(users, username)
