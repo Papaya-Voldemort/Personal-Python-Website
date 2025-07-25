@@ -25,6 +25,10 @@ def login():
         return
     # Successful login
     clear()
+    put_text(f"Welcome back, {user_info['username']}!")
+    time.sleep(1.5)
+    clear()
+    utils.dashboard()  # Redirect to the main menu after login
 
 def signup():
     user_info = input_group("Sign Up", [

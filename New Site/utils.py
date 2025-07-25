@@ -1,7 +1,10 @@
 from pywebio import start_server
-from pywebio.output import put_text, put_tabs, put_markdown, put_buttons
-from pywebio.input import input
+from pywebio.output import put_text, put_tabs, put_markdown, put_buttons, clear, use_scope, put_html, put_scope
+from pywebio.input import input, NUMBER
 import auth
+import time
+from datetime import datetime, timedelta
+import threading
 
 def main_menu():
     put_tabs([
@@ -23,6 +26,42 @@ def main_menu():
     ])
 
 def dashboard():
-    print("Make this later")
-    #TODO make dash
-    #TODO push code to repository
+    def timer():
+        with use_scope('countdown', clear=True):
+            put_markdown("## SoM Countdown")
+            with use_scope('timer', clear=True):
+                end_time = datetime(2025, 8, 31)
+
+                while True:
+                    current_time = datetime.now()
+                    seconds_until_end = int((end_time - current_time).total_seconds())
+
+                    if seconds_until_end <= 0:
+                        put_text("SoM has ended!")
+                        break
+
+                    put_text(f"Seconds until SoM ends: {seconds_until_end}")
+                    put_text(f"Minutes until SoM ends: {seconds_until_end / 60:.1f}")
+                    put_text(f"Hours until SoM ends: {seconds_until_end / 3600:.1f}")
+                    put_text(f"That's approximately {seconds_until_end / 86400:.1f} days until SoM ends!")
+
+                    time.sleep(1)  # Update every second
+                    clear('timer')
+
+
+
+
+    put_tabs([
+        {
+            'title': 'Dashboard',
+            'content': put_text("Welcome to the dashboard! Here you can use all of the features of the site."
+                                "\nJust click on one of the tabs to get started.")
+        },
+        {
+            'title': 'SoM Countdown',
+            'content': [
+                put_text("This is the SoM Countdown tab. Here you can see the countdown to the end of SoM 2025."),
+                put_buttons(['Start Countdown'], onclick=lambda btn: timer()),
+            ]
+        }
+    ])
