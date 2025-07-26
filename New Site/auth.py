@@ -4,6 +4,7 @@ from tinydb import TinyDB, Query
 import bcrypt
 import utils
 import time
+from utils import add_stat
 
 users = TinyDB('users.json')
 
@@ -26,6 +27,7 @@ def login():
     # Successful login
     clear()
     put_text(f"Welcome back, {user_info['username']}!")
+    add_stat('total_logins')  # Increment login count stat
     time.sleep(1.5)
     clear()
     utils.dashboard()  # Redirect to the main menu after login
