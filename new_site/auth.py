@@ -45,7 +45,7 @@ def login():
     time.sleep(1.5)
     clear()
     # Import utils here to avoid circular import
-    import utils
+    import new_site.utils as utils
     utils.dashboard()  # Redirect to the main menu after login
 
 def signup():
@@ -77,5 +77,5 @@ def signup():
     time.sleep(3)
     clear()
     # Import utils here to avoid circular import
-    import utils
+    import new_site.utils as utils
     utils.main_menu()  # Redirect to the main menu after signup

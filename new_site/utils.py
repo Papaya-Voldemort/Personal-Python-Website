@@ -3,7 +3,7 @@ from pywebio.input import input, NUMBER
 import time
 from datetime import datetime, timedelta
 import threading
-import AI
+import new_site.AI as AI
 import tinydb
 
 stats = tinydb.TinyDB('stats.json')
@@ -11,7 +11,7 @@ stats = tinydb.TinyDB('stats.json')
 
 def main_menu():
     # Import auth here to avoid circular import
-    import auth
+    import new_site.auth as auth
 
     put_tabs([
         {
@@ -86,7 +86,7 @@ def dashboard():
                 return
             else:
                 # Import here to avoid circular import
-                import auth
+                import new_site.auth as auth
                 auth.add_stat('ai_quotes_generated')
             put_text(quote)
 
@@ -123,7 +123,7 @@ def dashboard():
 
 def load_stats_with_increment():
     """Helper function to increment stats and load them"""
-    import auth
+    import new_site.auth as auth
     auth.add_stat('stats_page_views')
 
     clear('stats')

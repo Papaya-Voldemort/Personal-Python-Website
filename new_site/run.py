@@ -4,7 +4,7 @@ Simple runner script for the Personal Website Flask app
 Usage: python run.py
 """
 
-from main import app
+from new_site.main import app
 
 if __name__ == '__main__':
     print("Starting Personal Website Flask App...")
