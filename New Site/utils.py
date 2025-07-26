@@ -104,7 +104,8 @@ def dashboard():
         {
             'title': 'Dashboard',
             'content': put_text("Welcome to the dashboard! Here you can use all of the features of the site."
-                                "\nJust click on one of the tabs to get started.")
+                                "\nJust click on one of the tabs to get started."),
+            #add clear stats
         },
         {
             'title': 'SoM Countdown',
