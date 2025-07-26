@@ -1,7 +1,5 @@
-from pywebio import start_server
 from pywebio.output import put_text, put_tabs, put_markdown, put_buttons, clear, use_scope, put_html, put_scope, put_table
 from pywebio.input import input, NUMBER
-import auth
 import time
 from datetime import datetime, timedelta
 import threading
@@ -11,20 +9,10 @@ import tinydb
 stats = tinydb.TinyDB('stats.json')
 
 
-def add_stat(stat_name, increment=1):
-    # Check if stat already exists
-    existing_stat = stats.search(tinydb.Query().stat_name == stat_name)
-
-    if existing_stat:
-        # Update existing stat by incrementing the value
-        current_value = existing_stat[0].get('value', 0)
-        stats.update({'value': current_value + increment, 'timestamp': datetime.now().isoformat()},
-                     tinydb.Query().stat_name == stat_name)
-    else:
-        # Create new stat if it doesn't exist
-        stats.insert({'stat_name': stat_name, 'value': increment, 'timestamp': datetime.now().isoformat()})
-
 def main_menu():
+    # Import auth here to avoid circular import
+    import auth
+
     put_tabs([
         {
             'title': 'Logins',
@@ -42,6 +30,7 @@ def main_menu():
             ]
         },
     ])
+
 
 def dashboard():
 
@@ -87,7 +76,6 @@ def dashboard():
                     time.sleep(1)  # Update every second
                     clear('timer')
 
-
     def ai_quote_generator():
         clear('ai_quote')
         with use_scope('ai_quote', clear=True):
@@ -97,7 +85,9 @@ def dashboard():
                 put_text(quote)
                 return
             else:
-                add_stat('ai_quotes_generated')
+                # Import here to avoid circular import
+                import auth
+                auth.add_stat('ai_quotes_generated')
             put_text(quote)
 
     put_tabs([
@@ -125,7 +115,26 @@ def dashboard():
             'title': 'Stats',
             'content': [
                 put_text("This is the Stats tab. Here you can see some basic stats about the site."),
-                put_buttons(['Load Stats'], onclick=lambda btn: (clean_scopes(), add_stat('stats_page_views'), load_stats())),
+                put_buttons(['Load Stats'], onclick=lambda btn: (clean_scopes(), load_stats_with_increment())),
             ]
         }
     ])
+
+
+def load_stats_with_increment():
+    """Helper function to increment stats and load them"""
+    import auth
+    auth.add_stat('stats_page_views')
+
+    clear('stats')
+    with use_scope('stats', clear=True):
+        put_markdown("## Stats")
+        stats_data = stats.all()
+        if not stats_data:
+            put_text("No stats available.")
+            return
+
+        # Display stats as a table
+        headers = ['Stat Name', 'Value', 'Last Updated']
+        rows = [[stat['stat_name'], stat['value'], stat['timestamp']] for stat in stats_data]
+        put_table([headers] + rows)

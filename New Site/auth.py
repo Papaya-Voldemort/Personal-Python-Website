@@ -2,11 +2,25 @@ from pywebio.output import popup, close_popup, put_text, clear
 from pywebio.input import input_group, input
 from tinydb import TinyDB, Query
 import bcrypt
-import utils
 import time
-from utils import add_stat
+from datetime import datetime
 
 users = TinyDB('users.json')
+stats = TinyDB('stats.json')
+
+def add_stat(stat_name, increment=1):
+    """Add or increment a stat - moved here to avoid circular import"""
+    # Check if stat already exists
+    existing_stat = stats.search(Query().stat_name == stat_name)
+
+    if existing_stat:
+        # Update existing stat by incrementing the value
+        current_value = existing_stat[0].get('value', 0)
+        stats.update({'value': current_value + increment, 'timestamp': datetime.now().isoformat()},
+                     Query().stat_name == stat_name)
+    else:
+        # Create new stat if it doesn't exist
+        stats.insert({'stat_name': stat_name, 'value': increment, 'timestamp': datetime.now().isoformat()})
 
 def login():
     user_info = input_group("Login", [
@@ -30,6 +44,8 @@ def login():
     add_stat('total_logins')  # Increment login count stat
     time.sleep(1.5)
     clear()
+    # Import utils here to avoid circular import
+    import utils
     utils.dashboard()  # Redirect to the main menu after login
 
 def signup():
@@ -56,12 +72,10 @@ def signup():
         'email': user_info['email']
     })
 
-
     clear()
     put_text(f"User {user_info['username']} signed up successfully!")
     time.sleep(3)
     clear()
+    # Import utils here to avoid circular import
+    import utils
     utils.main_menu()  # Redirect to the main menu after signup
-
-
-
