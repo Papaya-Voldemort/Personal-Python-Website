@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import threading
 import new_site.AI as AI
 import tinydb
+import new_site.wifi_utils as wifi_utils
 
 stats = tinydb.TinyDB('stats.json')
 
@@ -48,7 +49,7 @@ def dashboard():
             rows = [[stat['stat_name'], stat['value'], stat['timestamp']] for stat in stats_data]
             put_table([headers] + rows)
 
-    clearable_scopes = ['countdown', 'timer', 'ai_quote', 'stats']
+    clearable_scopes = ['countdown', 'timer', 'ai_quote', 'stats', 'wifi_speed_test']
 
     def clean_scopes():
         for scope in clearable_scopes:
@@ -117,7 +118,13 @@ def dashboard():
                 put_text("This is the Stats tab. Here you can see some basic stats about the site."),
                 put_buttons(['Load Stats'], onclick=lambda btn: (clean_scopes(), load_stats_with_increment())),
             ]
-        }
+        },
+        { 'title': 'Speed Test',
+            'content': [
+                put_text("This is the Speed Test tab. Here you can test your internet speed."),
+                put_buttons(['Run Speed Test'], onclick=lambda btn: (clean_scopes(), wifi_utils.wifi_speed_test())),
+            ]
+        },
     ])
 
 
